@@ -1,0 +1,28 @@
+{
+    "name": "ai.natml.vision.nanodet",
+    "version": "1.0.0",
+    "displayName": "NanoDet",
+    "description": "Anchor-free ultra-fast object detection.",
+    "unity": "2020.3",
+    "dependencies": {
+        "ai.natml.natml": "1.0.17"
+    },
+    "keywords": [
+        "natml",
+        "machine learning",
+        "ml",
+        "aritificial intelligence",
+        "mediapipe",
+        "matte",
+        "background",
+        "background removal",
+        "augmented reality"
+    ],
+    "author": {
+        "name": "NatML",
+        "email": "hi@natml.ai",
+        "url": "https://github.com/natmlx"
+    },
+    "license": "Apache-2.0",
+    "repository": "github:natmlx/NatML"
+}
