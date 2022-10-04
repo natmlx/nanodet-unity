@@ -10,19 +10,19 @@ namespace NatML.Examples {
     using NatML.Devices.Outputs;
     using NatML.Features;
     using NatML.Vision;
-    using NatML.Visualizers;
+    using Visualizers;
 
     public sealed class NanoDetSample : MonoBehaviour {
 
         [Header(@"UI")]
         public NanoDetVisualizer visualizer;
 
-        CameraDevice cameraDevice;
-        TextureOutput textureOutput;
+        private CameraDevice cameraDevice;
+        private TextureOutput cameraTextureOutput;
 
-        MLModelData modelData;
-        MLModel model;
-        NanoDetPredictor predictor;
+        private MLModelData modelData;
+        private MLModel model;
+        private NanoDetPredictor predictor;
 
         async void Start () {
             // Request permissions
@@ -35,11 +35,11 @@ namespace NatML.Examples {
             var query = new MediaDeviceQuery(MediaDeviceCriteria.CameraDevice);
             cameraDevice = query.current as CameraDevice;
             // Start the preview
-            textureOutput = new TextureOutput();
-            cameraDevice.StartRunning(textureOutput);
+            cameraTextureOutput = new TextureOutput();
+            cameraDevice.StartRunning(cameraTextureOutput);
             // Display the camera preview
-            var previewTexture = await textureOutput;
-            visualizer.Render(previewTexture);
+            var cameraTexture = await cameraTextureOutput;
+            visualizer.image = cameraTexture;
             // Create the NanoDet predictor
             modelData = await MLModelData.FromHub("@natsuite/nanodet");
             model = modelData.Deserialize();
@@ -51,15 +51,18 @@ namespace NatML.Examples {
             if (predictor == null)
                 return;
             // Create input feature
-            var inputFeature = new MLImageFeature(textureOutput.texture);
-            (inputFeature.mean, inputFeature.std) = modelData.normalization;
-            inputFeature.aspectMode = modelData.aspectMode;
+            var imageFeature = new MLImageFeature(cameraTextureOutput.texture);
+            (imageFeature.mean, imageFeature.std) = modelData.normalization;
+            imageFeature.aspectMode = modelData.aspectMode;
             // Detect
-            var detections = predictor.Predict(inputFeature);
+            var detections = predictor.Predict(imageFeature);
             // Visualize
-            visualizer.Render(textureOutput.texture, detections);
+            visualizer.Render(detections);
         }
 
-        void OnDisable () => model?.Dispose();
+        void OnDisable () {
+            // Dispose the model
+            model?.Dispose();
+        }
     }
 }

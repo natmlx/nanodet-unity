@@ -43,6 +43,9 @@ namespace NatML.Vision {
             this.anchors8 = GenerateAnchors(inputType.width, inputType.height, 8);
             this.anchors16 = GenerateAnchors(inputType.width, inputType.height, 16);
             this.anchors32 = GenerateAnchors(inputType.width, inputType.height, 32);
+            this.candidateBoxes = new List<Rect>();
+            this.candidateScores = new List<float>();
+            this.candidateLabels = new List<string>();
         }
 
         /// <summary>
@@ -70,13 +73,13 @@ namespace NatML.Vision {
             var displacements8 = new MLArrayFeature<float>(outputFeatures[3]);      // (1,1600,32)
             var displacements16 = new MLArrayFeature<float>(outputFeatures[4]);     // (1,400,32)
             var displacements32 = new MLArrayFeature<float>(outputFeatures[5]);     // (1,100,32)
-            var candidateBoxes = new List<Rect>();
-            var candidateScores = new List<float>();
-            var candidateLabels = new List<string>();
             var softmax = stackalloc float[8];
             var boxEdges = stackalloc float[4];
             var featureWidthInv = 1f / inputType.width;
             var featureHeightInv = 1f / inputType.height;
+            candidateBoxes.Clear();
+            candidateScores.Clear();
+            candidateLabels.Clear();
             foreach (var (stride, logits, displacements, anchors) in new [] {
                 (8, logits8, displacements8, anchors8),
                 (16, logits16, displacements16, anchors16),
@@ -136,6 +139,9 @@ namespace NatML.Vision {
         private readonly Vector2[] anchors8;
         private readonly Vector2[] anchors16;
         private readonly Vector2[] anchors32;
+        private readonly List<Rect> candidateBoxes;
+        private readonly List<float> candidateScores;
+        private readonly List<string> candidateLabels;
 
         void IDisposable.Dispose () { } // Not used
 
