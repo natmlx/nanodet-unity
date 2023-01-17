@@ -1,6 +1,6 @@
 /* 
 *   NanoDet
-*   Copyright (c) 2022 NatML Inc. All Rights Reserved.
+*   Copyright © 2023 NatML Inc. All Rights Reserved.
 */
 
 namespace NatML.Examples.Visualizers {
@@ -8,10 +8,11 @@ namespace NatML.Examples.Visualizers {
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.UI;
+    using VideoKit.UI;
 
     /// <summary>
     /// </summary>
-    [RequireComponent(typeof(RawImage), typeof(AspectRatioFitter))]
+    [RequireComponent(typeof(VideoKitCameraView))]
     public sealed class NanoDetVisualizer : MonoBehaviour {
 
         #region --Inspector--

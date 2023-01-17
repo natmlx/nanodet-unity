@@ -586,6 +586,7 @@ GameObject:
   - component: {fileID: 1627475240}
   - component: {fileID: 1627475239}
   - component: {fileID: 1627475241}
+  - component: {fileID: 1627475243}
   - component: {fileID: 1627475242}
   m_Layer: 5
   m_Name: Preview
@@ -676,6 +677,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   detectionPrefab: {fileID: 709802569}
+--- !u!114 &1627475243
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1627475237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 145a5a333d6e14379ae91956c0b3373e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraManager: {fileID: 1924049083}
+  viewMode: 0
 --- !u!1 &1924049080
 GameObject:
   m_ObjectHideFlags: 0
@@ -685,6 +700,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1924049082}
+  - component: {fileID: 1924049083}
   - component: {fileID: 1924049081}
   m_Layer: 0
   m_Name: NanoDetSample
@@ -705,6 +721,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b5d55795c32be4fcfa753d5a4a7c794e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cameraManager: {fileID: 1924049083}
   visualizer: {fileID: 1627475242}
 --- !u!4 &1924049082
 Transform:
@@ -721,6 +738,26 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1924049083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1924049080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98622613d505143a9a06b4b11b0a82cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  resolution: 3
+  capabilities: 1
+  playOnAwake: 1
+  focusMode: 0
+  exposureMode: 0
+  OnFrame:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1934276594
 GameObject:
   m_ObjectHideFlags: 0
