@@ -1,6 +1,6 @@
 /* 
 *   NanoDet
-*   Copyright (c) 2022 NatML Inc. All Rights Reserved.
+*   Copyright © 2023 NatML Inc. All Rights Reserved.
 */
 
 namespace NatML.Vision {
@@ -8,6 +8,7 @@ namespace NatML.Vision {
     using System;
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
+    using System.Threading.Tasks;
     using System.Linq;
     using UnityEngine;
     using NatML.Features;
@@ -19,41 +20,44 @@ namespace NatML.Vision {
     /// This predictor accepts an image feature and produces a list of detections.
     /// Each detection is comprised of a normalized rect, label, and detection score.
     /// </summary>
-    public sealed class NanoDetPredictor : IMLPredictor<(Rect rect, string label, float score)[]> {
+    public sealed class NanoDetPredictor : IMLPredictor<NanoDetPredictor.Detection[]> {
+
+        #region --Types--
+        /// <summary>
+        /// Detection.
+        /// </summary>
+        public struct Detection {
+            
+            /// <summary>
+            /// Normalized detection rect.
+            /// </summary>
+            public Rect rect;
+            
+            /// <summary>
+            /// Detection label.
+            /// </summary>
+            public string label;
+
+            /// <summary>
+            /// Normalized detection score.
+            /// </summary>
+            public float score;
+        }
+        #endregion
+
 
         #region --Client API--
         /// <summary>
-        /// Class labels.
+        /// Predictor tag.
         /// </summary>
-        public readonly string[] labels;
-
-        /// <summary>
-        /// Create the NanoDet predictor.
-        /// </summary>
-        /// <param name="model">NanoDet ML model.</param>
-        /// <param name="labels">Classification labels.</param>
-        /// <param name="minScore">Minimum candidate score.</param>
-        /// <param name="maxIoU">Maximum intersection-over-union score for overlap removal.</param>
-        public NanoDetPredictor (MLModel model, string[] labels, float minScore = 0.35f, float maxIoU = 0.5f) {
-            this.model = model as MLEdgeModel;
-            this.labels = labels;
-            this.minScore = minScore;
-            this.maxIoU = maxIoU;
-            this.inputType = model.inputs[0] as MLImageType;
-            this.anchors8 = GenerateAnchors(inputType.width, inputType.height, 8);
-            this.anchors16 = GenerateAnchors(inputType.width, inputType.height, 16);
-            this.anchors32 = GenerateAnchors(inputType.width, inputType.height, 32);
-            this.candidateBoxes = new List<Rect>();
-            this.candidateScores = new List<float>();
-            this.candidateLabels = new List<string>();
-        }
+        public const string Tag = "@natsuite/nanodet";
 
         /// <summary>
         /// Detect objects in an image.
         /// </summary>
         /// <param name="inputs">Input image.</param>
         /// <returns>Detected objects.</returns>
-        public unsafe (Rect rect, string label, float score)[] Predict (params MLFeature[] inputs) {
+        public unsafe Detection[] Predict (params MLFeature[] inputs) {
             // Check
             if (inputs.Length != 1)
                 throw new ArgumentException(@"NanoDet predictor expects a single feature", nameof(inputs));
@@ -63,6 +67,11 @@ namespace NatML.Vision {
             var imageFeature = input as MLImageFeature;
             if (!imageType)
                 throw new ArgumentException(@"NanoDet predictor expects an an array or image feature", nameof(inputs));
+            // Preprocess
+            if (imageFeature != null) {
+                (imageFeature.mean, imageFeature.std) = model.normalization;
+                imageFeature.aspectMode = model.aspectMode;
+            }
             // Predict
             using var inputFeature = (input as IMLEdgeFeature).Create(inputType);
             using var outputFeatures = model.Predict(inputFeature);
@@ -118,15 +127,44 @@ namespace NatML.Vision {
                     // Add
                     candidateBoxes.Add(box);
                     candidateScores.Add(score);
-                    candidateLabels.Add(labels[label]);
+                    candidateLabels.Add(model.labels[label]);
                 }
             }
             var keepIdx = MLImageFeature.NonMaxSuppression(candidateBoxes, candidateScores, maxIoU);
-            var result = new List<(Rect, string, float)>();
-            foreach (var idx in keepIdx)
-                result.Add((candidateBoxes[idx], candidateLabels[idx], candidateScores[idx]));
+            var result = new List<Detection>();
+            foreach (var idx in keepIdx) {
+                var detection = new Detection {
+                    rect = candidateBoxes[idx],
+                    label = candidateLabels[idx],
+                    score = candidateScores[idx]
+                };
+                result.Add(detection);
+            }
             // Return
             return result.ToArray();
+        }
+
+        /// <summary>
+        /// Dispose the model and release resources.
+        /// </summary>
+        public void Dispose () => model.Dispose();
+
+        /// <summary>
+        /// Create the NanoDet predictor.
+        /// </summary>
+        /// <param name="minScore">Minimum candidate score.</param>
+        /// <param name="maxIoU">Maximum intersection-over-union score for overlap removal.</param>
+        /// <param name="configuration">Edge model configuration.</param>
+        /// <param name="accessKey">NatML access key.</param>
+        public static async Task<NanoDetPredictor> Create (
+            float minScore = 0.35f,
+            float maxIoU = 0.5f,
+            MLEdgeModel.Configuration configuration = null,
+            string accessKey = null
+        ) {
+            var model = await MLEdgeModel.Create(Tag, configuration, accessKey);
+            var predictor = new NanoDetPredictor(model, minScore, maxIoU);
+            return predictor;
         }
         #endregion
 
@@ -143,7 +181,18 @@ namespace NatML.Vision {
         private readonly List<float> candidateScores;
         private readonly List<string> candidateLabels;
 
-        void IDisposable.Dispose () { } // Not used
+        private NanoDetPredictor (MLModel model, float minScore, float maxIoU) {
+            this.model = model as MLEdgeModel;
+            this.minScore = minScore;
+            this.maxIoU = maxIoU;
+            this.inputType = model.inputs[0] as MLImageType;
+            this.anchors8 = GenerateAnchors(inputType.width, inputType.height, 8);
+            this.anchors16 = GenerateAnchors(inputType.width, inputType.height, 16);
+            this.anchors32 = GenerateAnchors(inputType.width, inputType.height, 32);
+            this.candidateBoxes = new List<Rect>();
+            this.candidateScores = new List<float>();
+            this.candidateLabels = new List<string>();
+        }
 
         private static Vector2[] GenerateAnchors (int width, int height, int stride) {
             var gridWidth = Mathf.FloorToInt((float)width / stride);
