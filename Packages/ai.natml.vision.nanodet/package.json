@@ -1,11 +1,11 @@
 {
     "name": "ai.natml.vision.nanodet",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "displayName": "NanoDet",
     "description": "Anchor-free ultra-fast object detection.",
-    "unity": "2021.2",
+    "unity": "2022.3",
     "dependencies": {
-        "ai.natml.natml": "1.1.4"
+        "ai.natml.natml": "1.1.15"
     },
     "keywords": [
         "natml",

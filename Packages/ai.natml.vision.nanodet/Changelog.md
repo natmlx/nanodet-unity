@@ -1,3 +1,6 @@
+## 1.0.2
++ Upgraded to NatML 1.1.15.
+
 ## 1.0.1
 + Added `NanoDetPredictor.Create` static method for creating the predictor.
 + Added `NanoDetPredictor.Tag` constant string for model embedding.

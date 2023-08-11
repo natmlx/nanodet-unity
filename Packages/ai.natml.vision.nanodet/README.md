@@ -13,7 +13,7 @@ Add the following items to your Unity project's `Packages/manifest.json`:
     }
   ],
   "dependencies": {
-    "ai.natml.vision.nanodet": "1.0.1"
+    "ai.natml.vision.nanodet": "1.0.2"
   }
 }
 ```
@@ -36,7 +36,7 @@ NanoDetPredictor.Detection[] detections = predictor.Predict(image);
 ___
 
 ## Requirements
-- Unity 2021.2+
+- Unity 2022.3+
 
 ## Quick Tips
 - Join the [NatML community on Discord](https://natml.ai/community).

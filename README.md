@@ -13,7 +13,7 @@ Retrieve your access key from [NatML Hub](https://hub.natml.ai/profile) and add 
 [See the predictor README for more details](Packages/ai.natml.vision.nanodet/README.md).
 
 ## Requirements
-- Unity 2021.2+
+- Unity 2022.3+
 
 ## Supported Platforms
 - Android API level 24+
